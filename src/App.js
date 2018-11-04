@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Select from './Select'
 import './App.css'
+import { countryList } from './exampleOptions'
 
 class App extends Component {
   constructor (props) {
@@ -23,18 +24,17 @@ class App extends Component {
   }
   render () {
     const { selected, menuName } = this.state
-    const viewOptions = [{ label: 12, value: 12 }, { label: 24, value: 24 }, { label: 48, value: 48 }, { label: 96, value: 96 }]
     const nestedViewOptions = [{
       label: 12,
       value: { name: 12 }
     }, { label: 24, value: { name: 24 } }, { label: 48, value: { name: 48 } }, { label: 96, value: { name: 96 } }]
     const viewCountSelectProps = {
       options: {
-        valueFieldName: 'value',
-        labelFiledName: 'label',
-        showPlaceHolder: true
+        valueFieldName: 'code',
+        labelFiledName: 'name',
+        showPlaceholder: true
       },
-      selectOptions: viewOptions,
+      selectOptions: countryList,
       selected,
       name: 'selected',
       required: true,
@@ -42,13 +42,17 @@ class App extends Component {
       style: {
         textAlign: 'center'
       },
+      isSearch: true,
+      searchOptions: {
+        placeholder: 'Please seach'
+      },
       onSelect: (selecteOptions, fieldName) => this.onSelect(selecteOptions, fieldName)
     }
     const nestedOptionSelectProps = {
       options: {
         valueFieldName: 'value.name',
         labelFiledName: 'label',
-        showPlaceHolder: true
+        showPlaceholder: true
       },
       selectOptions: nestedViewOptions,
       selected,

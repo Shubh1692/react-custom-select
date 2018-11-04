@@ -113,8 +113,8 @@
 }
 
 .react-custom-select.wide .list {
-  left: 0 ;
-  right: 0 ;
+  left: 0;
+  right: 0;
 }
 
 .react-custom-select.right {
@@ -144,8 +144,8 @@
   list-style: none;
   min-height: 40px;
   outline: none;
-  padding-left: 18px;
-  padding-right: 29px;
+  padding-left: 0;
+  padding-right: 0;
   text-align: left;
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
@@ -157,7 +157,7 @@
 }
 
 .react-custom-select .option:hover,
-.react-custom-select .option.focus,
+/* .react-custom-select .option.focus, */
 .react-custom-select .option.selected.focus {
   background-color: #f6f6f6;
 }
@@ -168,6 +168,13 @@
 
 .react-custom-select .option.selected {
   font-weight: bold;
+}
+
+.react-custom-select .selected {
+  font-weight: bold;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .react-custom-select .option.disabled {
@@ -194,4 +201,18 @@
 
 .text-capitalize {
   text-transform: capitalize;
+}
+
+.select-search input {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+
+.react-custom-select .option .select-option {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 5px;
 }

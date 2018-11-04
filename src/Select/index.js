@@ -1,5 +1,6 @@
 
 /* eslint-disable react/forbid-prop-types */
+/* eslint-disable space-before-function-paren */
 import React from 'react'
 import PropTypes from 'prop-types'
 import './Select.css'
@@ -7,13 +8,26 @@ import './Select.css'
 const defaultOptions = {
   valueFieldName: 'value',
   labelFiledName: 'label',
-  showPlaceHolder: true,
-  placeHoldder: 'Select',
+  showPlaceholder: true,
+  placeholder: 'Select',
   multi: true
 }
 
 const defaultStyle = {
   width: '100%'
+}
+
+const defaultListStyle = {
+  maxHeight: 200,
+  overflowY: 'auto',
+  width: '100%'
+}
+
+const deafultSearchOptions = {
+  placeholder: 'Search'
+}
+
+const defaultSelectedStyle = {
 }
 class Select extends React.Component {
   static propTypes = {
@@ -25,7 +39,11 @@ class Select extends React.Component {
     disabled: PropTypes.bool,
     disabledClassName: PropTypes.string,
     required: PropTypes.bool,
-    style: PropTypes.object
+    style: PropTypes.object,
+    isSearch: PropTypes.bool,
+    searchOptions: PropTypes.object,
+    listStyle: PropTypes.object,
+    selectedStyle: PropTypes.object
   };
   static defaultProps = {
     onSelect: () => { },
@@ -34,79 +52,133 @@ class Select extends React.Component {
     selected: null,
     disabled: false,
     disabledClassName: '',
-    required: false
+    required: false,
+    isSearch: false,
+    searchoPtions: {
+    }
   };
 
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
-      openDropdown: false
+      openDropdown: false,
+      searchList: props.selectOptions,
+      search: ''
     }
   }
-
-  componentDidMount () {
+  componentWillMount() {
+    document.onkeydown = e => {
+      switch (e.keyCode) {
+        case 38:
+          console.info('up')
+          break
+        case 40:
+          console.info('down')
+          break
+      }
+    }
+  }
+  componentDidMount() {
     document.addEventListener('mousedown', (event) => { this.handleClickOutside(event) })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     document.removeEventListener('mousedown', (event) => { this.handleClickOutside(event) })
   }
 
-  handleClickOutside (event) {
+  handleClickOutside(event) {
     if (this.dropdownRef && !this.dropdownRef.contains(event.target)) { this.setState({ openDropdown: false }) }
   }
 
-  acessJsonByPath (path, json) {
+  acessJsonByPath(path, json) {
     return path.split('.').reduce((o, k) => {
       return o && o[k]
     }, json)
   }
 
-  selectedValue (valueFieldName, selected) {
+  selectedValue(valueFieldName, selected) {
     return this.acessJsonByPath(valueFieldName, selected) || selected
   }
 
-  blankSelectedValue (valueFieldName, labelFiledName, placeHoldder) {
-    let blankObj = {}
+  blankSelectedValue(valueFieldName, labelFiledName, placeholder) {
+    let valudFieldObject = {}
+    let labelFiledObject = {}
     valueFieldName.split('.').reverse().forEach((p, i) => {
-      i === 0 ? blankObj[p] = '' : blankObj = { [p]: blankObj }
+      i === 0 ? valudFieldObject[p] = '' : valudFieldObject = { [p]: valudFieldObject }
     })
-    blankObj[labelFiledName] = placeHoldder
-    console.log(blankObj)
-    return blankObj
+    labelFiledName.split('.').reverse().forEach((p, i) => {
+      i === 0 ? labelFiledObject[p] = placeholder || '' : labelFiledObject = { [p]: labelFiledObject }
+    })
+
+    console.log(valudFieldObject, labelFiledObject)
+    return { ...labelFiledObject, ...valudFieldObject }
   }
 
-  render () {
-    const { openDropdown } = this.state
-    const { selectOptions, options, onSelect, name, selected, disabled, disabledClassName, required, style } = this.props
+  filterList(event, valueFieldName, labelFiledName) {
+    let searchList = this.props.selectOptions
+    searchList = searchList.filter((option) => {
+      return (this.selectedValue(valueFieldName, option).toString().toLowerCase().search(
+        event.target.value.toLowerCase()) !== -1) || (this.selectedValue(labelFiledName, option).toString().toLowerCase().search(event.target.value.toLowerCase()) !== -1)
+    })
+    this.setState({ searchList, search: event.target.value })
+  }
+
+  onSelect(option, name) {
+    this.setState({
+      openDropdown: false,
+      search: ''
+    }, () => {
+      this.props.onSelect(option, name)
+    })
+  }
+
+  onSelectOpen(openDropdown, disabled) {
+    if (!disabled) {
+      this.setState({
+        openDropdown: !openDropdown,
+        search: ''
+      }, () => {
+        if (this.searchInputRef) {
+          this.searchInputRef.focus()
+        }
+      })
+    }
+  }
+
+  render() {
+    const { openDropdown, search, searchList } = this.state
+    const { selectOptions, options, name, selected, disabled, disabledClassName, required, style, isSearch, searchOptions, listStyle, selectedStyle } = this.props
     const realOPtions = { ...defaultOptions, ...options }
-    const customStyle = { ...defaultStyle, ...style }
-    const { valueFieldName, labelFiledName, showPlaceHolder, placeHoldder } = realOPtions
-    const blankValue = this.blankSelectedValue(valueFieldName, labelFiledName, placeHoldder)
+    const customStyle = { ...defaultStyle, ...(style || {}) }
+    const customListStyle = { ...defaultListStyle, ...(listStyle || {}) }
+    const customSelectedStyle = { ...defaultSelectedStyle, ...(selectedStyle || {}) }
+    const customSearchOptions = { ...deafultSearchOptions, ...searchOptions }
+    const { valueFieldName, labelFiledName, showPlaceholder, placeholder } = realOPtions
+    const blankValue = this.blankSelectedValue(valueFieldName, labelFiledName, placeholder)
     const selectObject = selectOptions.find((option) => this.acessJsonByPath(valueFieldName, option) === this.selectedValue(valueFieldName, selected)) || blankValue
     console.log('selectObject', selectObject, selected)
     return (
       <div ref={node => {
         this.dropdownRef = node
-      }} className={`react-custom-select ${openDropdown ? 'open' : ''}`} onClick={() => {
-        if (!disabled) {
-          this.setState({
-            openDropdown: !openDropdown
-          })
-        }
-      }} style={customStyle}>
+      }} className={`react-custom-select ${openDropdown ? 'open' : ''}`} style={customStyle}>
         <select style={{
           display: 'none'
         }} value={selected || ''} required={required} onChange={() => { }}>
           {selectOptions.map(option => (<option key={this.acessJsonByPath(valueFieldName, option)} value={this.acessJsonByPath(valueFieldName, option)}>{this.acessJsonByPath(labelFiledName, option)}</option>))}
         </select>
-        <span className={`current text-capitalize ${disabled ? disabledClassName || 'disabled' : ''}`}>{selectObject[labelFiledName]}</span><ul className='list' style={customStyle}>
-          {showPlaceHolder && <li data-value='value' className={`option focus  text-capitalize ${this.acessJsonByPath(valueFieldName, selectObject) === '' ? 'selected' : ''}`} onClick={() => {
-            onSelect(blankValue, name)
-          }} style={customStyle}>{placeHoldder}</li>}
-          {selectOptions.map(option => (<li key={this.acessJsonByPath(valueFieldName, option)} data-value='value' className={`option focus  text-capitalize ${this.selectedValue(valueFieldName, selected) === this.acessJsonByPath(valueFieldName, option) ? 'selected' : ''}`} onClick={() => {
-            onSelect(option, name)
-          }} style={customStyle}>{this.acessJsonByPath(labelFiledName, option)}</li>))}</ul></div>
+        <div className='selected' onClick={() => this.onSelectOpen(openDropdown, disabled)} style={customSelectedStyle}>
+          <span className={`current text-capitalize ${disabled ? disabledClassName || 'disabled' : ''}`}>{this.acessJsonByPath(labelFiledName, selectObject)}</span> </div>
+        <ul className='list' style={customListStyle}>
+          {isSearch && <div className='select-search' style={customStyle}>
+            <input ref={searchInputRef => (this.searchInputRef = searchInputRef)} type='text' value={search} className='' placeholder={customSearchOptions.placeholder} onChange={(event) => this.filterList(event, valueFieldName, labelFiledName)} style={customStyle} />
+          </div>}
+          {showPlaceholder && search.trim().length === 0 && <li data-value='value' className={`option focus  text-capitalize ${this.acessJsonByPath(valueFieldName, selectObject) === '' ? 'selected' : ''}`} onClick={() => {
+            this.onSelect(blankValue, name)
+          }} style={customStyle}>{placeholder}</li>}
+          {searchList.map(option => (<li key={this.acessJsonByPath(valueFieldName, option)} data-value='value' className={`option focus  text-capitalize ${this.selectedValue(valueFieldName, selected) === this.acessJsonByPath(valueFieldName, option) ? 'selected' : ''}`} onClick={() => {
+            this.onSelect(option, name)
+          }} style={customStyle}><div className='select-option'>{this.acessJsonByPath(labelFiledName, option)}</div></li>))}
+        </ul></div >
     )
   }
 }
