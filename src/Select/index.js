@@ -145,6 +145,14 @@ class Select extends React.Component {
     }
   }
 
+  onSubmit(event, searchList, search, valueFieldName, labelFiledName, placeholder, name) {
+    event.stopPropagation()
+    event.preventDefault()
+    if (searchList.length) {
+      this.onSelect(search.trim().length ? searchList[0] : this.blankSelectedValue(valueFieldName, labelFiledName, placeholder), name)
+    }
+  }
+
   render() {
     const { openDropdown, search, searchList } = this.state
     const { selectOptions, options, name, selected, disabled, disabledClassName, required, style, isSearch, searchOptions, listStyle, selectedStyle } = this.props
@@ -161,24 +169,30 @@ class Select extends React.Component {
       <div ref={node => {
         this.dropdownRef = node
       }} className={`react-custom-select ${openDropdown ? 'open' : ''}`} style={customStyle}>
-        <select style={{
-          display: 'none'
-        }} value={selected || ''} required={required} onChange={() => { }}>
-          {selectOptions.map(option => (<option key={this.acessJsonByPath(valueFieldName, option)} value={this.acessJsonByPath(valueFieldName, option)}>{this.acessJsonByPath(labelFiledName, option)}</option>))}
-        </select>
-        <div className='selected' onClick={() => this.onSelectOpen(openDropdown, disabled)} style={customSelectedStyle}>
-          <span className={`current text-capitalize ${disabled ? disabledClassName || 'disabled' : ''}`}>{this.acessJsonByPath(labelFiledName, selectObject)}</span> </div>
-        <ul className='list' style={customListStyle}>
-          {isSearch && <div className='select-search' style={customStyle}>
-            <input ref={searchInputRef => (this.searchInputRef = searchInputRef)} type='text' value={search} className='' placeholder={customSearchOptions.placeholder} onChange={(event) => this.filterList(event, valueFieldName, labelFiledName)} style={customStyle} />
-          </div>}
-          {showPlaceholder && search.trim().length === 0 && <li data-value='value' className={`option focus  text-capitalize ${this.acessJsonByPath(valueFieldName, selectObject) === '' ? 'selected' : ''}`} onClick={() => {
-            this.onSelect(blankValue, name)
-          }} style={customStyle}>{placeholder}</li>}
-          {searchList.map(option => (<li key={this.acessJsonByPath(valueFieldName, option)} data-value='value' className={`option focus  text-capitalize ${this.selectedValue(valueFieldName, selected) === this.acessJsonByPath(valueFieldName, option) ? 'selected' : ''}`} onClick={() => {
-            this.onSelect(option, name)
-          }} style={customStyle}><div className='select-option'>{this.acessJsonByPath(labelFiledName, option)}</div></li>))}
-        </ul></div >
+        <form onSubmit={(event) => this.onSubmit(event, searchList, search, valueFieldName, labelFiledName, placeholder, name)}>
+          <button type='submit' style={{
+            display: 'none'
+          }} />
+          <select style={{
+            display: 'none'
+          }} value={selected || ''} required={required} onChange={() => { }}>
+            {selectOptions.map(option => (<option key={this.acessJsonByPath(valueFieldName, option)} value={this.acessJsonByPath(valueFieldName, option)}>{this.acessJsonByPath(labelFiledName, option)}</option>))}
+          </select>
+          <div className='selected' onClick={() => this.onSelectOpen(openDropdown, disabled)} style={customSelectedStyle}>
+            <span className={`current text-capitalize ${disabled ? disabledClassName || 'disabled' : ''}`}>{this.acessJsonByPath(labelFiledName, selectObject)}</span> </div>
+          <ul className='list' style={customListStyle}>
+            {isSearch && <div className='select-search' style={customStyle}>
+              <input ref={searchInputRef => (this.searchInputRef = searchInputRef)} type='text' value={search} className='' placeholder={customSearchOptions.placeholder} onChange={(event) => this.filterList(event, valueFieldName, labelFiledName)} style={customStyle} />
+            </div>}
+            {showPlaceholder && search.trim().length === 0 && <li data-value='value' className={`option focus  text-capitalize ${this.acessJsonByPath(valueFieldName, selectObject) === '' ? 'selected' : ''}`} onClick={() => {
+              this.onSelect(blankValue, name)
+            }} style={customStyle}>{placeholder}</li>}
+            {searchList.map(option => (<li key={this.acessJsonByPath(valueFieldName, option)} data-value='value' className={`option focus  text-capitalize ${this.selectedValue(valueFieldName, selected) === this.acessJsonByPath(valueFieldName, option) ? 'selected' : ''}`} onClick={() => {
+              this.onSelect(option, name)
+            }} style={customStyle}><div className='select-option'>{this.acessJsonByPath(labelFiledName, option)}</div></li>))}
+          </ul>
+        </form></div >
+
     )
   }
 }
