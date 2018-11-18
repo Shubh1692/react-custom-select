@@ -43,6 +43,7 @@ class App extends Component {
         textAlign: 'center'
       },
       isSearch: true,
+      isClearable: false,
       searchOptions: {
         placeholder: 'Please seach'
       },

@@ -43,7 +43,8 @@ class Select extends React.Component {
     isSearch: PropTypes.bool,
     searchOptions: PropTypes.object,
     listStyle: PropTypes.object,
-    selectedStyle: PropTypes.object
+    selectedStyle: PropTypes.object,
+    isClearable: PropTypes.bool
   };
   static defaultProps = {
     onSelect: () => { },
@@ -55,7 +56,8 @@ class Select extends React.Component {
     required: false,
     isSearch: false,
     searchoPtions: {
-    }
+    },
+    isClearable: true
   };
 
   constructor(props) {
@@ -155,7 +157,7 @@ class Select extends React.Component {
 
   render() {
     const { openDropdown, search, searchList } = this.state
-    const { selectOptions, options, name, selected, disabled, disabledClassName, required, style, isSearch, searchOptions, listStyle, selectedStyle } = this.props
+    const { selectOptions, options, name, selected, disabled, disabledClassName, required, style, isSearch, searchOptions, listStyle, selectedStyle, isClearable } = this.props
     const realOPtions = { ...defaultOptions, ...options }
     const customStyle = { ...defaultStyle, ...(style || {}) }
     const customListStyle = { ...defaultListStyle, ...(listStyle || {}) }
@@ -164,12 +166,12 @@ class Select extends React.Component {
     const { valueFieldName, labelFiledName, showPlaceholder, placeholder } = realOPtions
     const blankValue = this.blankSelectedValue(valueFieldName, labelFiledName, placeholder)
     const selectObject = selectOptions.find((option) => this.acessJsonByPath(valueFieldName, option) === this.selectedValue(valueFieldName, selected)) || blankValue
-    console.log('selectObject', selectObject, selected)
+    console.log('selectObject', this.acessJsonByPath(labelFiledName, selectObject), selected)
     return (
       <div ref={node => {
         this.dropdownRef = node
       }} className={`react-custom-select ${openDropdown ? 'open' : ''}`} style={customStyle}>
-        <form onSubmit={(event) => this.onSubmit(event, searchList, search, valueFieldName, labelFiledName, placeholder, name)}>
+        <form className='form' onSubmit={(event) => this.onSubmit(event, searchList, search, valueFieldName, labelFiledName, placeholder, name)}>
           <button type='submit' style={{
             display: 'none'
           }} />
@@ -180,6 +182,7 @@ class Select extends React.Component {
           </select>
           <div className='selected' onClick={() => this.onSelectOpen(openDropdown, disabled)} style={customSelectedStyle}>
             <span className={`current text-capitalize ${disabled ? disabledClassName || 'disabled' : ''}`}>{this.acessJsonByPath(labelFiledName, selectObject)}</span> </div>
+          {isClearable && this.acessJsonByPath(labelFiledName, selectObject) && this.acessJsonByPath(labelFiledName, selectObject) !== placeholder && <span className='close-action' onClick={() => this.onSelect(blankValue, name)}>&times;</span>}
           <ul className='list' style={customListStyle}>
             {isSearch && <div className='select-search' style={customStyle}>
               <input ref={searchInputRef => (this.searchInputRef = searchInputRef)} type='text' value={search} className='' placeholder={customSearchOptions.placeholder} onChange={(event) => this.filterList(event, valueFieldName, labelFiledName)} style={customStyle} />

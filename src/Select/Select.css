@@ -66,6 +66,16 @@
   transform: rotate(-135deg);
 }
 
+.react-custom-select .form {
+  position: relative;;
+}
+
+.react-custom-select .close-action {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
 .react-custom-select .list {
   background-color: #fff;
   border-radius: 5px;
